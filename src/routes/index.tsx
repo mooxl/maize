@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/avatar';
 import { buttonStyles } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Link } from '@/components/ui/link';
@@ -31,13 +32,12 @@ const Page = () => {
 			{todayStandups?.map((standup) => (
 				<Card key={standup._id} className="flex flex-row justify-between p-4">
 					<div className="flex items-center gap-x-4">
-						<div className="rounded-full bg-primary/15 w-12 h-12 flex items-center justify-center">
-							<MicVocal />
-						</div>
+						<Avatar size="extra-large" icon={<MicVocal />} />
+
 						<div className="flex flex-col justify-between">
 							<p className="text-base font-medium">{standup.name}</p>
 							<p className="text-sm text-muted-foreground">
-								{standup.scheduledTime}
+								{standup.description}
 							</p>
 						</div>
 					</div>

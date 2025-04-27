@@ -17,7 +17,7 @@ export const Breadcrumbs = () => {
 				}
 				return (
 					<BreadcrumbsItem key={match.id}>
-						<Link to={match.fullPath}>
+						<Link to={match.pathname}>
 							{navigationMap[match.fullPath].label}
 						</Link>
 					</BreadcrumbsItem>

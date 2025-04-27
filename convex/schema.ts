@@ -11,14 +11,12 @@ export default defineSchema({
 		userId: v.id('user'),
 	}),
 	standup: defineTable({
-		userIds: v.array(v.id('user')),
 		name: v.string(),
-		scheduledTime: v.string(),
-		state: v.union(
-			v.literal('created'),
-			v.literal('started'),
-			v.literal('completed'),
-		),
+		description: v.string(),
+		userIds: v.array(v.id('user')),
+		updateIds: v.array(v.id('update')),
+		startedAt: v.number(),
+		finishedAt: v.number(),
 	}),
 	update: defineTable({
 		standupId: v.id('standup'),
@@ -28,5 +26,7 @@ export default defineSchema({
 			today: v.string(),
 			blockers: v.string(),
 		}),
+		startedAt: v.number(),
+		finishedAt: v.number(),
 	}),
 });

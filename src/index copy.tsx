@@ -52,8 +52,8 @@ const Page = () => {
 
 	const formTask = useAppForm({
 		defaultValues: {
-			userId: '' as Id<'user'> | '',
-			text: '',
+			id: '' as Id<'user'> | '',
+			name: '',
 		},
 		validators: {
 			onChange: userSchema,
@@ -61,8 +61,8 @@ const Page = () => {
 		onSubmit: async (values) => {
 			console.log('submit', values);
 			await createTask({
-				userId: values.value.userId as Id<'user'>,
-				text: values.value.text,
+				userId: values.value.id as Id<'user'>,
+				text: values.value.name,
 			});
 			formTask.reset();
 		},

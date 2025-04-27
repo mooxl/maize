@@ -8,7 +8,8 @@
 		"start": "vite --port 3000",
 		"build": "vite build && tsc",
 		"serve": "vite preview",
-		"test": "vitest run"
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@convex-dev/react-query": "^0.0.0-alpha.8",

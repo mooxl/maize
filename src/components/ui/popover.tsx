@@ -1,3 +1,4 @@
+import { useMediaQuery } from '@/utils/hooks';
 import type {
 	DialogProps,
 	DialogTriggerProps,
@@ -14,10 +15,8 @@ import {
 	composeRenderProps,
 	useSlottedContext,
 } from 'react-aria-components';
-import { tv } from 'tailwind-variants';
-
-import { useMediaQuery } from '@/utils/hooks';
 import { twMerge } from 'tailwind-merge';
+import { tv } from 'tailwind-variants';
 import type {
 	DialogBodyProps,
 	DialogFooterProps,
@@ -145,9 +144,10 @@ const PopoverContent = ({
 					drawer({ ...renderProps, isMenu, className }),
 				)}
 			>
-				<dialog aria-label={props['aria-label'] ?? 'List item'}>
+				{/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
+				<Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
 					{children}
-				</dialog>
+				</Dialog>
 			</Modal>
 		</ModalOverlay>
 	) : (
@@ -175,9 +175,10 @@ const PopoverContent = ({
 				</OverlayArrow>
 			)}
 			{!isComboBoxTrigger ? (
-				<dialog aria-label={props['aria-label'] ?? 'List item'}>
+				// biome-ignore lint/a11y/useSemanticElements: <explanation>
+				<Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
 					{children}
-				</dialog>
+				</Dialog>
 			) : (
 				children
 			)}

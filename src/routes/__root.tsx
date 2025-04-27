@@ -14,6 +14,7 @@ import {
 	SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { UserSwitcher } from '@/components/user-switcher';
+import type { User } from '@/schemas/user';
 import { navigationMap } from '@/utils/constants';
 import type { QueryClient } from '@tanstack/react-query';
 import type { ToOptions } from '@tanstack/react-router';
@@ -27,6 +28,7 @@ import { RouterProvider } from 'react-aria-components';
 
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient;
+	user: User | null;
 }>()({
 	component: () => <Root />,
 });

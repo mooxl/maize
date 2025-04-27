@@ -8,6 +8,7 @@ import {
 	createRouter,
 } from '@tanstack/react-router';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
+import { useAtomValue } from 'jotai/react';
 import { StrictMode } from 'react';
 import {} from 'react-aria-components';
 import ReactDOM from 'react-dom/client';
@@ -16,6 +17,7 @@ import { ComboBox } from './components/ui/combo-box';
 import { TextField } from './components/ui/text-field';
 import './global.css';
 import { routeTree } from './routeTree.gen';
+import { userAtom } from './states/user';
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -47,6 +49,7 @@ const router = createRouter({
 	routeTree,
 	context: {
 		queryClient,
+		user: null,
 	},
 	defaultPreload: 'intent',
 	scrollRestoration: true,
@@ -54,15 +57,22 @@ const router = createRouter({
 	defaultPreloadStaleTime: 0,
 });
 
+const App = () => {
+	const user = useAtomValue(userAtom);
+	return (
+		<ConvexProvider client={convex}>
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} context={{ user }} />
+			</QueryClientProvider>
+		</ConvexProvider>
+	);
+};
+
 const rootElement = document.getElementById('app');
 if (rootElement && !rootElement.innerHTML) {
 	ReactDOM.createRoot(rootElement).render(
 		<StrictMode>
-			<ConvexProvider client={convex}>
-				<QueryClientProvider client={queryClient}>
-					<RouterProvider router={router} />
-				</QueryClientProvider>
-			</ConvexProvider>
+			<App />
 		</StrictMode>,
 	);
 }
