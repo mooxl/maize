@@ -1,0 +1,36 @@
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "es2022",
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"noEmit": true,
+
+		"strict": true,
+		"strictNullChecks": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": false,
+		"noImplicitOverride": true,
+
+		"module": "esnext",
+		"moduleResolution": "bundler",
+
+		"jsx": "react-jsx",
+		"baseUrl": "src",
+		"lib": ["es2022", "dom", "dom.iterable", "esnext"],
+		"types": ["vite/client", "vitest/globals"],
+
+		"paths": {
+			"@/*": ["./*"]
+		}
+	},
+	"include": ["src", "vite.config.ts"],
+	"exclude": ["node_modules"]
+}
