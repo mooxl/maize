@@ -145,9 +145,9 @@ const PopoverContent = ({
 					drawer({ ...renderProps, isMenu, className }),
 				)}
 			>
-				<Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
+				<dialog aria-label={props['aria-label'] ?? 'List item'}>
 					{children}
-				</Dialog>
+				</dialog>
 			</Modal>
 		</ModalOverlay>
 	) : (
@@ -169,14 +169,15 @@ const PopoverContent = ({
 						viewBox="0 0 12 12"
 						className="group-data-[placement=left]:-rotate-90 block fill-overlay stroke-border group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
 					>
+						<title>Popover arrow</title>
 						<path d="M0 0 L6 6 L12 0" />
 					</svg>
 				</OverlayArrow>
 			)}
 			{!isComboBoxTrigger ? (
-				<Dialog role="dialog" aria-label={props['aria-label'] ?? 'List item'}>
+				<dialog aria-label={props['aria-label'] ?? 'List item'}>
 					{children}
-				</Dialog>
+				</dialog>
 			) : (
 				children
 			)}
@@ -197,5 +198,5 @@ Popover.Footer = PopoverFooter;
 Popover.Header = PopoverHeader;
 Popover.Title = PopoverTitle;
 
-export type { PopoverProps, PopoverContentProps };
 export { Popover, PopoverContent };
+export type { PopoverContentProps, PopoverProps };

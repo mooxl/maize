@@ -20,7 +20,7 @@ const Keyboard = ({ keys, classNames, className, ...props }: KeyboardProps) => {
 		>
 			{(Array.isArray(keys) ? keys : keys.split('')).map((char, index) => (
 				<kbd
-					key={index}
+					key={char}
 					className={twMerge(
 						'tracking-widest',
 						index > 0 && char.length > 1 && 'pl-1',
@@ -34,5 +34,5 @@ const Keyboard = ({ keys, classNames, className, ...props }: KeyboardProps) => {
 	);
 };
 
-export type { KeyboardProps };
 export { Keyboard };
+export type { KeyboardProps };

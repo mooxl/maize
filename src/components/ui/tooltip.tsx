@@ -75,6 +75,7 @@ const TooltipContent = ({
 						viewBox="0 0 12 12"
 						className="arx group-data-[placement=left]:-rotate-90 group-data-[placement=bottom]:rotate-180 group-data-[placement=right]:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
 					>
+						<title>Tooltip arrow</title>
 						<path d="M0 0 L6 6 L12 0" />
 					</svg>
 				</OverlayArrow>
@@ -89,5 +90,5 @@ const TooltipTrigger = Button;
 Tooltip.Trigger = TooltipTrigger;
 Tooltip.Content = TooltipContent;
 
-export type { TooltipProps, TooltipContentProps };
 export { Tooltip };
+export type { TooltipContentProps, TooltipProps };
