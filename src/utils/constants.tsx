@@ -29,9 +29,9 @@ export const navigationMap: Record<
 		label: 'Standup',
 		icon: <EqualApproximately data-slot="icon" />,
 	},
-	'/standups/$standupId/notes': {
-		id: 'standup-notes',
-		label: 'Notes',
+	'/standups/$standupId/update': {
+		id: 'standup-update',
+		label: 'Update',
 		icon: <EqualApproximately data-slot="icon" />,
 	},
 };

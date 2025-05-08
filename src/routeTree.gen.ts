@@ -16,7 +16,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as StandupsIndexImport } from './routes/standups.index'
 import { Route as StandupsStandupIdImport } from './routes/standups.$standupId'
 import { Route as StandupsStandupIdIndexImport } from './routes/standups.$standupId.index'
-import { Route as StandupsStandupIdNotesImport } from './routes/standups.$standupId.notes'
+import { Route as StandupsStandupIdUpdateImport } from './routes/standups.$standupId.update'
 
 // Create/Update Routes
 
@@ -50,9 +50,9 @@ const StandupsStandupIdIndexRoute = StandupsStandupIdIndexImport.update({
   getParentRoute: () => StandupsStandupIdRoute,
 } as any)
 
-const StandupsStandupIdNotesRoute = StandupsStandupIdNotesImport.update({
-  id: '/notes',
-  path: '/notes',
+const StandupsStandupIdUpdateRoute = StandupsStandupIdUpdateImport.update({
+  id: '/update',
+  path: '/update',
   getParentRoute: () => StandupsStandupIdRoute,
 } as any)
 
@@ -88,11 +88,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StandupsIndexImport
       parentRoute: typeof rootRoute
     }
-    '/standups/$standupId/notes': {
-      id: '/standups/$standupId/notes'
-      path: '/notes'
-      fullPath: '/standups/$standupId/notes'
-      preLoaderRoute: typeof StandupsStandupIdNotesImport
+    '/standups/$standupId/update': {
+      id: '/standups/$standupId/update'
+      path: '/update'
+      fullPath: '/standups/$standupId/update'
+      preLoaderRoute: typeof StandupsStandupIdUpdateImport
       parentRoute: typeof StandupsStandupIdImport
     }
     '/standups/$standupId/': {
@@ -108,12 +108,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface StandupsStandupIdRouteChildren {
-  StandupsStandupIdNotesRoute: typeof StandupsStandupIdNotesRoute
+  StandupsStandupIdUpdateRoute: typeof StandupsStandupIdUpdateRoute
   StandupsStandupIdIndexRoute: typeof StandupsStandupIdIndexRoute
 }
 
 const StandupsStandupIdRouteChildren: StandupsStandupIdRouteChildren = {
-  StandupsStandupIdNotesRoute: StandupsStandupIdNotesRoute,
+  StandupsStandupIdUpdateRoute: StandupsStandupIdUpdateRoute,
   StandupsStandupIdIndexRoute: StandupsStandupIdIndexRoute,
 }
 
@@ -125,7 +125,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/standups/$standupId': typeof StandupsStandupIdRouteWithChildren
   '/standups': typeof StandupsIndexRoute
-  '/standups/$standupId/notes': typeof StandupsStandupIdNotesRoute
+  '/standups/$standupId/update': typeof StandupsStandupIdUpdateRoute
   '/standups/$standupId/': typeof StandupsStandupIdIndexRoute
 }
 
@@ -133,7 +133,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/standups': typeof StandupsIndexRoute
-  '/standups/$standupId/notes': typeof StandupsStandupIdNotesRoute
+  '/standups/$standupId/update': typeof StandupsStandupIdUpdateRoute
   '/standups/$standupId': typeof StandupsStandupIdIndexRoute
 }
 
@@ -143,7 +143,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/standups/$standupId': typeof StandupsStandupIdRouteWithChildren
   '/standups/': typeof StandupsIndexRoute
-  '/standups/$standupId/notes': typeof StandupsStandupIdNotesRoute
+  '/standups/$standupId/update': typeof StandupsStandupIdUpdateRoute
   '/standups/$standupId/': typeof StandupsStandupIdIndexRoute
 }
 
@@ -154,14 +154,14 @@ export interface FileRouteTypes {
     | '/about'
     | '/standups/$standupId'
     | '/standups'
-    | '/standups/$standupId/notes'
+    | '/standups/$standupId/update'
     | '/standups/$standupId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/standups'
-    | '/standups/$standupId/notes'
+    | '/standups/$standupId/update'
     | '/standups/$standupId'
   id:
     | '__root__'
@@ -169,7 +169,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/standups/$standupId'
     | '/standups/'
-    | '/standups/$standupId/notes'
+    | '/standups/$standupId/update'
     | '/standups/$standupId/'
   fileRoutesById: FileRoutesById
 }
@@ -213,15 +213,15 @@ export const routeTree = rootRoute
     "/standups/$standupId": {
       "filePath": "standups.$standupId.tsx",
       "children": [
-        "/standups/$standupId/notes",
+        "/standups/$standupId/update",
         "/standups/$standupId/"
       ]
     },
     "/standups/": {
       "filePath": "standups.index.tsx"
     },
-    "/standups/$standupId/notes": {
-      "filePath": "standups.$standupId.notes.tsx",
+    "/standups/$standupId/update": {
+      "filePath": "standups.$standupId.update.tsx",
       "parent": "/standups/$standupId"
     },
     "/standups/$standupId/": {

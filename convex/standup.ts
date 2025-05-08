@@ -1,3 +1,4 @@
+import { getAll } from 'convex-helpers/server/relationships';
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
@@ -42,7 +43,14 @@ export const getById = query({
 	},
 	handler: async (ctx, args) => {
 		const standup = await ctx.db.get(args.id);
-		return standup;
+		if (!standup) {
+			throw new Error('Standup not found');
+		}
+		const [users, updates] = await Promise.all([
+			getAll(ctx.db, standup.userIds),
+			getAll(ctx.db, standup.updateIds),
+		]);
+		return { ...standup, users, updates };
 	},
 });
 

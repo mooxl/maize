@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Shuffle, Users } from 'lucide-react';
 import { api } from '../../convex/_generated/api';
@@ -22,12 +22,7 @@ const userQuery = (id: string | Id<'user'>) =>
 export const Route = createFileRoute('/standups/$standupId/')({
 	loader: async ({ context: { queryClient }, params: { standupId } }) => {
 		const standup = await queryClient.ensureQueryData(standupQuery(standupId));
-		const users = await Promise.all(
-			standup?.userIds.map((userId) =>
-				queryClient.ensureQueryData(userQuery(userId)),
-			) ?? [],
-		);
-		return { standup, users };
+		return { standup };
 	},
 	component: () => <Page />,
 });
@@ -41,15 +36,6 @@ const Page = () => {
 		initialData: loaderData.standup,
 	});
 
-	const users = useQueries({
-		queries: standup
-			? standup.userIds.map((userId) => ({
-					...userQuery(userId),
-					initialData: loaderData.users.find((user) => user?._id === userId),
-				}))
-			: [],
-	});
-
 	const { mutate: shuffle } = useMutation({
 		mutationFn: useConvexMutation(api.standup.shuffle),
 	});
@@ -57,10 +43,11 @@ const Page = () => {
 	if (standup === null) {
 		return <div>Standup not found</div>;
 	}
+	console.log(standup);
 	return (
 		<section className="flex gap-4 min-h-1/2">
 			<Card className="flex-1/3">
-				<CardHeader className="flex items-center justify-between">
+				<CardHeader className="flex items-center justify-between ">
 					<div className="flex items-center gap-x-2">
 						<Users />
 						<CardTitle>Team</CardTitle>
@@ -73,15 +60,27 @@ const Page = () => {
 				<hr />
 				<CardContent>
 					<div className="flex flex-col gap-y-8">
-						{users.map((user, i) => (
-							<div key={user.data?._id} className="flex items-center gap-x-4">
-								<Avatar size="large" initials={(i + 1).toString()} />
-								<div>
-									<p className="text-lg font-semibold">{user.data?.name}</p>
-									<Badge intent="success">Ready</Badge>
+						{standup.users.map((user, i) => {
+							if (!user) {
+								return null;
+							}
+							return (
+								<div key={user?._id} className="flex items-center gap-x-4">
+									<Avatar size="large" initials={(i + 1).toString()} />
+									<div>
+										<p className="text-lg font-semibold">{user?.name}</p>
+										{
+											// @ts-expect-error: Ger updates and check it there
+											standup.updateIds.includes(user._id) ? (
+												<Badge intent="success">Ready</Badge>
+											) : (
+												<Badge intent="warning">Not Ready</Badge>
+											)
+										}
+									</div>
 								</div>
-							</div>
-						))}
+							);
+						})}
 					</div>
 				</CardContent>
 			</Card>

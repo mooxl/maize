@@ -6,10 +6,6 @@ export default defineSchema({
 		name: v.string(),
 		taskIds: v.array(v.id('task')),
 	}),
-	task: defineTable({
-		text: v.string(),
-		userId: v.id('user'),
-	}),
 	standup: defineTable({
 		name: v.string(),
 		description: v.string(),

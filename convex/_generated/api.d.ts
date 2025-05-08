@@ -14,7 +14,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as standup from "../standup.js";
-import type * as task from "../task.js";
 import type * as user from "../user.js";
 
 /**
@@ -27,7 +26,6 @@ import type * as user from "../user.js";
  */
 declare const fullApi: ApiFromModules<{
   standup: typeof standup;
-  task: typeof task;
   user: typeof user;
 }>;
 export declare const api: FilterApi<

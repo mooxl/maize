@@ -53,7 +53,7 @@ const Page = () => {
 							Start
 						</Link>
 						<Link
-							to="/standups/$standupId/notes"
+							to="/standups/$standupId/update"
 							params={{ standupId: standup._id }}
 							className={buttonStyles({
 								intent: 'primary',

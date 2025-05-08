@@ -73,7 +73,7 @@ const Page = () => {
 					Stand-up
 				</Link>
 				<Link
-					to="/standups/$standupId/notes"
+					to="/standups/$standupId/update"
 					params={{ standupId }}
 					activeOptions={{ exact: true }}
 					activeProps={{
@@ -87,7 +87,7 @@ const Page = () => {
 						size: 'small',
 					})} rounded-xs flex-1/2`}
 				>
-					Your Notes
+					Your update
 				</Link>
 			</Card>
 			<Outlet />
