@@ -32,11 +32,10 @@ const Root = () => {
 						🌽
 					</ActionIcon>
 				</Link>
-
 				<UserSwitcher />
 			</nav>
 			<Divider orientation="vertical" />
-			<ScrollArea className="py-8 px-14 h-full">
+			<ScrollArea className="py-8 px-14 h-full w-full">
 				<Outlet />
 				<TanStackRouterDevtools position="bottom-right" />
 			</ScrollArea>
