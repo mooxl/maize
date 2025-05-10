@@ -1,8 +1,5 @@
-import { Avatar } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
+import { Avatar, Badge, Button, Divider, Paper } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { Shuffle, Users } from 'lucide-react';
@@ -46,35 +43,49 @@ const Page = () => {
 	console.log(standup);
 	return (
 		<section className="flex gap-4 min-h-1/2">
-			<Card className="flex-1/3">
-				<CardHeader className="flex items-center justify-between ">
+			<Paper classNames={{ root: 'flex-1/3 p-4 space-y-4' }} withBorder>
+				<div className="flex items-center justify-between ">
 					<div className="flex items-center gap-x-2">
 						<Users />
-						<CardTitle>Team</CardTitle>
+						<p className="text-lg font-semibold">Team</p>
 					</div>
-					<Button intent="outline" onClick={() => shuffle({ id: standup._id })}>
-						<Shuffle data-slot="icon" />
+					<Button
+						variant="light"
+						size="xs"
+						onClick={() => shuffle({ id: standup._id })}
+						classNames={{ label: 'flex items-center gap-x-2!' }}
+					>
+						<Shuffle size={16} />
 						Shuffle
 					</Button>
-				</CardHeader>
-				<hr />
-				<CardContent>
-					<div className="flex flex-col gap-y-8">
+				</div>
+				<Divider orientation="horizontal" />
+				<div>
+					<div className="space-y-4">
 						{standup.users.map((user, i) => {
 							if (!user) {
 								return null;
 							}
 							return (
 								<div key={user?._id} className="flex items-center gap-x-4">
-									<Avatar size="large" initials={(i + 1).toString()} />
-									<div>
-										<p className="text-lg font-semibold">{user?.name}</p>
+									<Avatar size="md" color="gray">
+										{user?.name.slice(0, 2)}
+									</Avatar>
+									<div className="flex flex-col">
+										<p className="text-base font-semibold">{user?.name}</p>
 										{
 											// @ts-expect-error: Ger updates and check it there
 											standup.updateIds.includes(user._id) ? (
-												<Badge intent="success">Ready</Badge>
+												<Badge color="green" size="xs">
+													Ready
+												</Badge>
 											) : (
-												<Badge intent="warning">Not Ready</Badge>
+												<Badge
+													classNames={{ root: 'bg-orange-400!' }}
+													size="xs"
+												>
+													Not Ready
+												</Badge>
 											)
 										}
 									</div>
@@ -82,18 +93,18 @@ const Page = () => {
 							);
 						})}
 					</div>
-				</CardContent>
-			</Card>
-			<Card className="flex-2/3">
+				</div>
+			</Paper>
+			<Paper className="flex-2/3 p-4" withBorder>
 				{(() => {
 					if (standup.startedAt === 0) {
 						return (
-							<CardContent className="flex items-center justify-center h-full flex-col gap-y-4">
+							<div className="flex items-center justify-center h-full flex-col gap-y-4">
 								<h3 className="text-2xl font-semibold">
 									Stand-up has not started yet
 								</h3>
 								<Button size="large">Start Stand-up</Button>
-							</CardContent>
+							</div>
 						);
 					}
 					if (standup.finishedAt === 0) {
@@ -101,7 +112,7 @@ const Page = () => {
 					}
 					return <div>Completed</div>;
 				})()}
-			</Card>
+			</Paper>
 		</section>
 	);
 };

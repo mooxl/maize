@@ -12,10 +12,10 @@ export const UserSwitcher = () => {
 	const [user, setUser] = useAtom(userAtom);
 	const router = useRouter();
 	return (
-		<Popover opened={opened} onChange={setOpened} position="right-end">
+		<Popover opened={opened} onChange={setOpened} position="bottom">
 			<Popover.Target>
 				<Avatar
-					size="lg"
+					size="md"
 					radius="md"
 					color="blue"
 					onClick={() => setOpened((o) => !o)}
