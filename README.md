@@ -74,9 +74,8 @@ npm run dev
 1. Push your code to GitHub
 2. Connect your repository to Netlify/Vercel
 3. Configure the following build settings:
-   - Build command: `npm run build`
+   - Build command: `npx convex deploy --cmd 'npm run build'`
    - Publish directory: `dist`
-   - Node version: 20 (or higher)
 
 4. Add the following environment variables:
    - `CONVEX_DEPLOY_KEY` - From your Convex dashboard
