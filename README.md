@@ -71,16 +71,40 @@ npm run dev
 
 ### Deployment
 
-1. Push your code to GitHub
-2. Connect your repository to Netlify/Vercel
-3. Configure the following build settings:
+#### Option 1: Netlify Deployment
+
+The easiest way to deploy your frontend is using Netlify:
+
+1. Push your code to a Git repository
+1. Connect your repository to Netlify
+1. Add the environment variables
+1. Configure the build settings:
    - Build command: `npx convex deploy --cmd 'npm run build'`
    - Publish directory: `dist`
+1. Deploy!
 
-4. Add the following environment variables:
-   - `CONVEX_DEPLOY_KEY` - From your Convex dashboard
-   - `VITE_AUTH0_DOMAIN` - Your Auth0 domain
-   - `VITE_AUTH0_CLIENT_ID` - Your Auth0 client ID
+#### Option 2: Self-hosted Docker Deployment
+
+You can also self-host your frontend using Docker:
+
+1. Make sure your `.env` is populated with the correct credentials.
+
+1. Build the Docker image:
+```bash
+docker build -t your-app-name .
+```
+
+1. Run the container:
+```bash
+docker run -p 80:80 your-app-name
+```
+
+The Docker setup includes:
+- Multi-stage build for smaller image size
+- Nginx for serving static files
+- Optimized caching and compression
+- Security headers
+- Health check endpoint
 
 ## Development
 
