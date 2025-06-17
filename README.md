@@ -38,7 +38,6 @@ npm run dev
 - npm
 - A Convex account (for backend functionality)
 - An Auth0 account (for authentication)
-- A Netlify/Vercel account (for deployment)
 
 ### Backend Setup
 
