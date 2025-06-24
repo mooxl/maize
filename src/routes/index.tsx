@@ -177,7 +177,7 @@ const Page = () => {
 								<div className="flex items-center gap-x-4">
 									<Link to="/$standupId" params={{ standupId: standup._id }}>
 										<Button variant="light" size="md">
-											Join
+											View
 										</Button>
 									</Link>
 								</div>
