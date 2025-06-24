@@ -9,6 +9,7 @@ import {
 import { useConvexMutation } from '@convex-dev/react-query';
 import { Badge, Button, Popover } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
+import { useRouteContext } from '@tanstack/react-router';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 
@@ -27,6 +28,10 @@ export const Status = ({
 	currentUpdate,
 	currentUser,
 }: Props) => {
+	const me = useRouteContext({
+		from: '/$standupId',
+		select: (ctx) => ctx.user,
+	});
 	const { mutate: removeUser } = useMutation({
 		mutationFn: useConvexMutation(api.standup_user.remove),
 	});
@@ -67,7 +72,7 @@ export const Status = ({
 			</Badge>
 		);
 	}
-
+	console.log(me?._id, user._id);
 	return (
 		<div className="flex items-center gap-x-2">
 			<Badge
@@ -79,38 +84,43 @@ export const Status = ({
 			>
 				Not Ready
 			</Badge>
-			<Popover position="right">
-				<Popover.Target>
-					<Badge
-						classNames={{
-							root: 'hover:bg-red-100!',
-						}}
-						variant="outline"
-						size="xs"
-						color="red"
-					>
-						x
-					</Badge>
-				</Popover.Target>
-				<Popover.Dropdown>
-					<p className="text-sm">Are you sure you want to delete this user?</p>
-					<Button
-						variant="light"
-						size="xs"
-						color="red"
-						className="mt-2"
-						onClick={() => {
-							if (!standupId) return;
-							removeUser({
-								standupId,
-								userId: user._id,
-							});
-						}}
-					>
-						Delete
-					</Button>
-				</Popover.Dropdown>
-			</Popover>
+			{me?._id !== user._id && (
+				<Popover position="right">
+					<Popover.Target>
+						<Badge
+							classNames={{
+								root: 'hover:bg-red-100!',
+							}}
+							variant="outline"
+							size="xs"
+							color="red"
+						>
+							x
+						</Badge>
+					</Popover.Target>
+					<Popover.Dropdown>
+						<p className="text-sm">
+							Are you sure you want to delete this user?
+						</p>
+
+						<Button
+							variant="light"
+							size="xs"
+							color="red"
+							className="mt-2"
+							onClick={() => {
+								if (!standupId) return;
+								removeUser({
+									standupId,
+									userId: user._id,
+								});
+							}}
+						>
+							Delete
+						</Button>
+					</Popover.Dropdown>
+				</Popover>
+			)}
 		</div>
 	);
 };
