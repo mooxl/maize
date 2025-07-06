@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS build
 
 # Build arguments
 ARG CONVEX_DEPLOYMENT
@@ -31,7 +31,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
     && touch /var/run/nginx.pid \
     && chown -R appuser:appgroup /var/run/nginx.pid
 COPY --chown=appuser:appgroup nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder --chown=appuser:appgroup /app/dist /usr/share/nginx/html
+COPY --from=build --chown=appuser:appgroup /app/dist /usr/share/nginx/html
 USER appuser
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
