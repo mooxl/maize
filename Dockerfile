@@ -1,3 +1,6 @@
+# Build stage
+FROM node:20-alpine AS builder
+
 # Build arguments
 ARG CONVEX_DEPLOYMENT
 ARG CONVEX_URL
@@ -11,8 +14,6 @@ ENV VITE_AUTH0_CLIENT_ID=$VITE_AUTH0_CLIENT_ID
 ENV VITE_AUTH0_DOMAIN=$VITE_AUTH0_DOMAIN
 ENV CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 
-# Build stage
-FROM node:20-alpine AS builder
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY package*.json ./
