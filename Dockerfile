@@ -17,7 +17,7 @@ ENV CONVEX_DEPLOY_KEY=$CONVEX_DEPLOY_KEY
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production --frozen-lockfile 
+RUN npm install --frozen-lockfile 
 COPY --chown=appuser:appgroup . .
 RUN npx convex deploy --cmd 'npm run build'
 
