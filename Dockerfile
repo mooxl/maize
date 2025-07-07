@@ -28,8 +28,11 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
     && chown -R appuser:appgroup /var/cache/nginx \
     && chown -R appuser:appgroup /var/log/nginx \
     && chown -R appuser:appgroup /etc/nginx/conf.d \
-    && touch /var/run/nginx.pid \
-    && chown -R appuser:appgroup /var/run/nginx.pid
+    && mkdir -p /run/nginx \
+    && chown -R appuser:appgroup /run/nginx \
+    && touch /run/nginx.pid \
+    && chown appuser:appgroup /run/nginx.pid
+
 COPY --chown=appuser:appgroup nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build --chown=appuser:appgroup /app/dist /usr/share/nginx/html
 USER appuser
