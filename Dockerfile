@@ -33,7 +33,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
 COPY --chown=appuser:appgroup nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build --chown=appuser:appgroup /app/dist /usr/share/nginx/html
 USER appuser
-EXPOSE 80
+EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 CMD ["nginx", "-g", "daemon off;"]
