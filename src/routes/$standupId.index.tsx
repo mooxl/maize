@@ -18,7 +18,14 @@ import {
 } from '@mantine/core';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { ArrowRight, Clock, SaveAll, Shuffle, Users } from 'lucide-react';
+import {
+	ArrowRight,
+	ArrowRightFromLine,
+	Clock,
+	SaveAll,
+	Shuffle,
+	Users,
+} from 'lucide-react';
 import { useMemo } from 'react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
@@ -55,6 +62,10 @@ const Page = () => {
 
 	const { mutate: next } = useMutation({
 		mutationFn: useConvexMutation(api.standup.next),
+	});
+
+	const { mutate: skip } = useMutation({
+		mutationFn: useConvexMutation(api.standup.skip),
 	});
 
 	const { mutate: finish } = useMutation({
@@ -215,21 +226,37 @@ const Page = () => {
 										</div>
 									</div>
 									{nextUser ? (
-										<Button
-											variant="light"
-											size="sm"
-											classNames={{ label: 'flex items-center gap-x-2!' }}
-											disabled={!isUserReady(standup.updates, nextUser._id)}
-											onClick={() =>
-												next({
-													standupId: standup._id as Id<'standup'>,
-													currentUser: currentUser?._id as Id<'user'>,
-													nextUser: nextUser?._id as Id<'user'>,
-												})
-											}
-										>
-											<ArrowRight size={16} /> Next
-										</Button>
+										isUserReady(standup.updates, nextUser._id) ? (
+											<Button
+												variant="light"
+												size="sm"
+												classNames={{ label: 'flex items-center gap-x-2!' }}
+												onClick={() =>
+													next({
+														standupId: standup._id as Id<'standup'>,
+														currentUser: currentUser?._id as Id<'user'>,
+														nextUser: nextUser?._id as Id<'user'>,
+													})
+												}
+											>
+												<ArrowRight size={16} /> Next
+											</Button>
+										) : (
+											<Button
+												variant="outline"
+												size="sm"
+												classNames={{ label: 'flex items-center gap-x-1!' }}
+												onClick={() =>
+													skip({
+														standupId: standup._id as Id<'standup'>,
+														currentUser: currentUser?._id as Id<'user'>,
+														userToSkip: nextUser?._id as Id<'user'>,
+													})
+												}
+											>
+												<ArrowRightFromLine size={16} /> Skip
+											</Button>
+										)
 									) : (
 										<Button
 											variant="light"

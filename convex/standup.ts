@@ -153,6 +153,77 @@ export const next = mutation({
 		]);
 	},
 });
+
+export const skip = mutation({
+	args: {
+		standupId: v.id('standup'),
+		currentUser: v.id('user'),
+		userToSkip: v.id('user'),
+	},
+	handler: async (ctx, args) => {
+		const currentUpdate = await ctx.db
+			.query('update')
+			.filter((q) =>
+				q.and(
+					q.eq(q.field('standupId'), args.standupId),
+					q.eq(q.field('userId'), args.currentUser),
+				),
+			)
+			.first();
+		if (currentUpdate === null) {
+			throw new Error('Current update not found');
+		}
+
+		const standupUsers = await ctx.db
+			.query('standup_user')
+			.withIndex('standupId', (q) => q.eq('standupId', args.standupId))
+			.collect();
+
+		const sortedUsers = standupUsers.toSorted((a, b) => a.order - b.order);
+		const userToSkipIndex = sortedUsers.findIndex(
+			(u) => u.userId === args.userToSkip,
+		);
+
+		const nextUserIndex = userToSkipIndex + 1;
+		let nextUser = null;
+
+		if (nextUserIndex < sortedUsers.length) {
+			nextUser = sortedUsers[nextUserIndex];
+		}
+
+		await ctx.db.patch(currentUpdate._id, {
+			finishedAt: Date.now(),
+		});
+
+		if (nextUser) {
+			const nextUpdate = await ctx.db
+				.query('update')
+				.filter((q) =>
+					q.and(
+						q.eq(q.field('standupId'), args.standupId),
+						q.eq(q.field('userId'), nextUser.userId),
+					),
+				)
+				.first();
+			if (nextUpdate) {
+				await Promise.all([
+					ctx.db.patch(nextUpdate._id, {
+						startedAt: Date.now(),
+					}),
+					ctx.db.patch(args.standupId, {
+						currentUser: nextUser.userId,
+					}),
+				]);
+			}
+		} else {
+			await ctx.db.patch(args.standupId, {
+				finishedAt: Date.now(),
+				currentUser: undefined,
+			});
+		}
+	},
+});
+
 export const finish = mutation({
 	args: {
 		id: v.id('standup'),
