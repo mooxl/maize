@@ -8,6 +8,7 @@ import {
 	useNavigate,
 	useRouterState,
 } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 
@@ -23,6 +24,8 @@ export const Route = createFileRoute('/$standupId')({
 	},
 	component: () => <Page />,
 });
+
+const bell = new Audio('/bell.mp3');
 
 const Page = () => {
 	const { standupId } = Route.useParams();
@@ -47,6 +50,16 @@ const Page = () => {
 	});
 
 	const userIsJoined = standup.users.some((u) => u._id === user?._id);
+
+	useEffect(() => {
+		if (
+			standup.currentUser === user?._id &&
+			standup.startedAt !== 0 &&
+			standup.finishedAt === 0
+		) {
+			bell.play();
+		}
+	}, [standup.currentUser, standup.startedAt, standup.finishedAt, user?._id]);
 
 	if (!standup) return <div>Standup not found</div>;
 
