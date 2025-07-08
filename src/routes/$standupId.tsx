@@ -33,6 +33,9 @@ const Page = () => {
 
 	const { mutate: removeUser } = useMutation({
 		mutationFn: useConvexMutation(api.standup_user.remove),
+		onSuccess: () => {
+			navigate({ to: '/$standupId', params: { standupId } });
+		},
 	});
 	const { mutate: joinStandup } = useMutation({
 		mutationFn: useConvexMutation(api.standup_user.join),
@@ -42,6 +45,8 @@ const Page = () => {
 		...standupQuery(standupId),
 		initialData: loaderData.standup,
 	});
+
+	const userIsJoined = standup.users.some((u) => u._id === user?._id);
 
 	if (!standup) return <div>Standup not found</div>;
 
@@ -56,9 +61,10 @@ const Page = () => {
 					</div>
 				</div>
 				<div className="flex items-center gap-x-4">
-					{standup.startedAt === 0 && standup.finishedAt === 0 && (
+					{standup.startedAt !== 0 && (
 						<Timer
 							startedAt={standup.startedAt ?? 0}
+							finishedAt={standup.finishedAt}
 							size="lg"
 							classNames={{
 								root: 'bg-gray-100!',
@@ -68,7 +74,7 @@ const Page = () => {
 					)}
 					{standup.finishedAt === 0 && user && (
 						<div>
-							{standup.users.some((u) => u._id === user._id) ? (
+							{userIsJoined ? (
 								<Button
 									disabled={(() => {
 										const update = standup.updates.find(
@@ -106,6 +112,7 @@ const Page = () => {
 			</div>
 			{standup.finishedAt === 0 && (
 				<SegmentedControl
+					disabled={!userIsJoined}
 					value={location.includes('update') ? 'update' : '..'}
 					onChange={(value) => navigate({ to: value })}
 					data={[
