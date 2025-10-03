@@ -19,6 +19,7 @@ import {
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import {
+	ArrowLeft,
 	ArrowRight,
 	ArrowRightFromLine,
 	Clock,
@@ -64,6 +65,10 @@ const Page = () => {
 		mutationFn: useConvexMutation(api.standup.next),
 	});
 
+	const { mutate: previous } = useMutation({
+		mutationFn: useConvexMutation(api.standup.previous),
+	});
+
 	const { mutate: skip } = useMutation({
 		mutationFn: useConvexMutation(api.standup.skip),
 	});
@@ -80,20 +85,24 @@ const Page = () => {
 		return <div>Standup not found</div>;
 	}
 
-	const { currentUser, currentUpdate, nextUser } = useMemo(() => {
+	const { currentUser, currentUpdate, nextUser, previousUser } = useMemo(() => {
 		const currentUser = standup.users.find(
 			(user) => user._id === standup.currentUser,
 		);
 		const currentUpdate = standup.updates.find(
 			(update) => update.userId === standup.currentUser,
 		);
+		const previousUser =
+			standup.users[
+				standup.users.findIndex((user) => user._id === standup.currentUser) - 1
+			];
 		const nextUser =
 			standup.users[
 				standup.users.findIndex((user) => user._id === standup.currentUser) + 1
 			];
-		return { currentUser, currentUpdate, nextUser };
+		return { currentUser, currentUpdate, nextUser, previousUser };
 	}, [standup.users, standup.currentUser, standup.updates]);
-
+	console.log(previousUser);
 	return (
 		<section className="flex gap-4 h-[calc(100vh-18rem)]">
 			{standup.finishedAt === 0 && (
@@ -225,52 +234,71 @@ const Page = () => {
 											/>
 										</div>
 									</div>
-									{nextUser ? (
-										isUserReady(standup.updates, nextUser._id) ? (
+									<div className="flex gap-x-2">
+										{previousUser && (
 											<Button
 												variant="light"
 												size="sm"
 												classNames={{ label: 'flex items-center gap-x-2!' }}
 												onClick={() =>
-													next({
+													previous({
 														standupId: standup._id as Id<'standup'>,
 														currentUser: currentUser?._id as Id<'user'>,
-														nextUser: nextUser?._id as Id<'user'>,
+														previousUser: previousUser._id as Id<'user'>,
 													})
 												}
 											>
-												<ArrowRight size={16} /> Next
+												<ArrowLeft size={16} /> Previous
 											</Button>
+										)}
+										{nextUser ? (
+											isUserReady(standup.updates, nextUser._id) ? (
+												<Button
+													variant="light"
+													size="sm"
+													classNames={{ label: 'flex items-center gap-x-2!' }}
+													onClick={() =>
+														next({
+															standupId: standup._id as Id<'standup'>,
+															currentUser: currentUser?._id as Id<'user'>,
+															nextUser: nextUser?._id as Id<'user'>,
+														})
+													}
+												>
+													<ArrowRight size={16} /> Next
+												</Button>
+											) : (
+												<Button
+													variant="outline"
+													size="sm"
+													classNames={{ label: 'flex items-center gap-x-1!' }}
+													onClick={() =>
+														skip({
+															standupId: standup._id as Id<'standup'>,
+															currentUser: currentUser?._id as Id<'user'>,
+															userToSkip: nextUser?._id as Id<'user'>,
+														})
+													}
+												>
+													<ArrowRightFromLine size={16} /> Skip
+												</Button>
+											)
 										) : (
 											<Button
-												variant="outline"
+												variant="light"
 												size="sm"
-												classNames={{ label: 'flex items-center gap-x-1!' }}
+												color="red"
 												onClick={() =>
-													skip({
-														standupId: standup._id as Id<'standup'>,
-														currentUser: currentUser?._id as Id<'user'>,
-														userToSkip: nextUser?._id as Id<'user'>,
+													finish({
+														id: standup._id as Id<'standup'>,
+														currentUpdateId: currentUpdate?._id as Id<'update'>,
 													})
 												}
 											>
-												<ArrowRightFromLine size={16} /> Skip
+												Finish
 											</Button>
-										)
-									) : (
-										<Button
-											variant="light"
-											size="sm"
-											onClick={() =>
-												finish({
-													id: standup._id as Id<'standup'>,
-													currentUpdateId: currentUpdate?._id as Id<'update'>,
-												})
-											}
-										>
-											Finish
-										</Button>
-									)}
+										)}
+									</div>
 								</div>
 								<Divider orientation="horizontal" />
 								<div className="flex flex-col gap-y-4 overflow-y-auto max-h-[calc(100vh-25rem)]">

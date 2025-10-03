@@ -109,6 +109,55 @@ export const start = mutation({
 	},
 });
 
+export const previous = mutation({
+	args: {
+		standupId: v.id('standup'),
+		currentUser: v.id('user'),
+		previousUser: v.id('user'),
+	},
+	handler: async (ctx, args) => {
+		const [currentUpdate, previousUpdate] = await Promise.all([
+			ctx.db
+				.query('update')
+				.filter((q) =>
+					q.and(
+						q.eq(q.field('standupId'), args.standupId),
+						q.eq(q.field('userId'), args.currentUser),
+					),
+				)
+				.first(),
+			ctx.db
+				.query('update')
+				.filter((q) =>
+					q.and(
+						q.eq(q.field('standupId'), args.standupId),
+						q.eq(q.field('userId'), args.previousUser),
+					),
+				)
+				.first(),
+		]);
+		if (currentUpdate === null) {
+			throw new Error('Update not found');
+		}
+		if (previousUpdate === null) {
+			throw new Error('Previous user not found');
+		}
+		await Promise.all([
+			ctx.db.patch(currentUpdate._id, {
+				startedAt: 0,
+				finishedAt: 0,
+			}),
+			ctx.db.patch(previousUpdate._id, {
+				startedAt: Date.now(),
+				finishedAt: 0,
+			}),
+			ctx.db.patch(args.standupId, {
+				currentUser: args.previousUser,
+			}),
+		]);
+	},
+});
+
 export const next = mutation({
 	args: {
 		standupId: v.id('standup'),
