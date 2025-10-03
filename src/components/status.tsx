@@ -72,7 +72,6 @@ export const Status = ({
 			</Badge>
 		);
 	}
-	console.log(me?._id, user._id);
 	return (
 		<div className="flex items-center gap-x-2">
 			<Badge

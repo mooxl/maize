@@ -69,3 +69,29 @@ export const shuffle = mutation({
 		);
 	},
 });
+
+export const reorder = mutation({
+	args: {
+		standupId: v.id('standup'),
+		userId: v.id('user'),
+		to: v.number(),
+	},
+	handler: async (ctx, args) => {
+		const users = await ctx.db
+			.query('standup_user')
+			.withIndex('standupId', (q) => q.eq('standupId', args.standupId))
+			.collect();
+
+		const sortedUsers = users.toSorted((a, b) => a.order - b.order);
+		const fromIndex = sortedUsers.findIndex((u) => u.userId === args.userId);
+		if (fromIndex === -1) return;
+		const [user] = sortedUsers.splice(fromIndex, 1);
+		if (!user) return;
+		sortedUsers.splice(args.to, 0, user);
+		const updates = sortedUsers
+			.filter((u, index) => u.order !== index)
+			.map((u, index) => ctx.db.patch(u._id, { order: index }));
+
+		await Promise.all(updates);
+	},
+});

@@ -6,6 +6,14 @@ import { formatDuration } from '@/utils/helpers';
 import { isUserReady } from '@/utils/user';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import {
+	DragDropContext,
+	Draggable,
+	type DraggableProvided,
+	type DropResult,
+	Droppable,
+	type DroppableProvided,
+} from '@hello-pangea/dnd';
+import {
 	Accordion,
 	ActionIcon,
 	Alert,
@@ -14,7 +22,6 @@ import {
 	Button,
 	Divider,
 	Paper,
-	Stepper,
 } from '@mantine/core';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -22,7 +29,9 @@ import {
 	ArrowLeft,
 	ArrowRight,
 	ArrowRightFromLine,
+	Check,
 	Clock,
+	GripVertical,
 	SaveAll,
 	Shuffle,
 	Users,
@@ -81,28 +90,75 @@ const Page = () => {
 		mutationFn: useConvexMutation(api.standup.setIcebreaker),
 	});
 
+	const { mutate: reorder } = useMutation({
+		mutationFn: useConvexMutation(
+			api.standup_user.reorder,
+		).withOptimisticUpdate((localStore, args) => {
+			const { standupId, userId, to } = args;
+			const standup = localStore.getQuery(
+				api.standup.getByIdWithUsersAndUpdates,
+				{ id: standupId },
+			);
+			if (standup?.users) {
+				const newUsers = [...standup.users];
+				const fromIndex = newUsers.findIndex((u) => u._id === userId);
+				if (fromIndex !== -1) {
+					const [movedUser] = newUsers.splice(fromIndex, 1);
+					if (movedUser) {
+						newUsers.splice(to, 0, movedUser);
+					}
+				}
+				localStore.setQuery(
+					api.standup.getByIdWithUsersAndUpdates,
+					{ id: standupId },
+					{ ...standup, users: newUsers },
+				);
+			}
+		}),
+	});
+
 	if (standup === null) {
 		return <div>Standup not found</div>;
 	}
 
-	const { currentUser, currentUpdate, nextUser, previousUser } = useMemo(() => {
-		const currentUser = standup.users.find(
-			(user) => user._id === standup.currentUser,
-		);
-		const currentUpdate = standup.updates.find(
-			(update) => update.userId === standup.currentUser,
-		);
-		const previousUser =
-			standup.users[
-				standup.users.findIndex((user) => user._id === standup.currentUser) - 1
-			];
-		const nextUser =
-			standup.users[
-				standup.users.findIndex((user) => user._id === standup.currentUser) + 1
-			];
-		return { currentUser, currentUpdate, nextUser, previousUser };
-	}, [standup.users, standup.currentUser, standup.updates]);
-	console.log(previousUser);
+	const { currentUser, currentUpdate, currentIndex, nextUser, previousUser } =
+		useMemo(() => {
+			const currentUser = standup.users.find(
+				(user) => user._id === standup.currentUser,
+			);
+			const currentIndex = standup.users.findIndex(
+				(user) => user._id === standup.currentUser,
+			);
+			const currentUpdate = standup.updates.find(
+				(update) => update.userId === standup.currentUser,
+			);
+			const previousUser =
+				standup.users[
+					standup.users.findIndex((user) => user._id === standup.currentUser) -
+						1
+				];
+			const nextUser =
+				standup.users[
+					standup.users.findIndex((user) => user._id === standup.currentUser) +
+						1
+				];
+			return {
+				currentUser,
+				currentUpdate,
+				currentIndex,
+				nextUser,
+				previousUser,
+			};
+		}, [standup.users, standup.currentUser, standup.updates]);
+	const handleDragEnd = (result: DropResult) => {
+		const to = result.destination?.index;
+		if (to === undefined || !standup._id) return;
+		reorder({
+			standupId: standup._id,
+			userId: result.draggableId as Id<'user'>,
+			to,
+		});
+	};
 	return (
 		<section className="flex gap-4 h-[calc(100vh-18rem)]">
 			{standup.finishedAt === 0 && (
@@ -132,31 +188,63 @@ const Page = () => {
 					</div>
 					<Divider orientation="horizontal" />
 					<div className="h-full overflow-y-scroll py-4">
-						<Stepper
-							active={standup.users.findIndex(
-								(user) => user._id === standup.currentUser,
-							)}
-							orientation="vertical"
-						>
-							{standup.users.map((user) => {
-								return (
-									<Stepper.Step
-										key={user._id}
-										label={user.name}
-										icon={<Avatar src={user.picture} />}
-										description={
-											<Status
-												standupId={standup._id}
-												user={user}
-												updates={standup.updates}
-												currentUpdate={currentUpdate}
-												currentUser={standup.currentUser}
-											/>
-										}
-									/>
-								);
-							})}
-						</Stepper>
+						<DragDropContext onDragEnd={handleDragEnd}>
+							<Droppable droppableId="yes">
+								{(provided: DroppableProvided) => (
+									<div {...provided.droppableProps} ref={provided.innerRef}>
+										{standup.users.map((user, index) => (
+											<Draggable
+												key={user._id}
+												draggableId={user._id}
+												index={index}
+											>
+												{(provided: DraggableProvided) => (
+													<div
+														className="flex items-center justify-between w-full pb-4"
+														ref={provided.innerRef}
+														{...provided.draggableProps}
+													>
+														<div className="flex gap-x-2">
+															{index < currentIndex ? (
+																<div className="rounded-full size-11 bg-blue-200 text-blue-400 flex items-center justify-center">
+																	<Check />
+																</div>
+															) : (
+																<img
+																	className={`rounded-full size-11 overflow-hidden border-3 ${currentIndex === index ? 'border-blue-400' : 'border-gray-200'}`}
+																	src={user.picture}
+																	alt="profile"
+																/>
+															)}
+
+															<div className="flex flex-col">
+																<p className="font-medium">{user.name}</p>
+																<Status
+																	standupId={standup._id}
+																	user={user}
+																	updates={standup.updates}
+																	currentUpdate={currentUpdate}
+																	currentUser={standup.currentUser}
+																/>
+															</div>
+														</div>
+														{standup.startedAt === 0 && (
+															<ActionIcon
+																variant="subtle"
+																{...provided.dragHandleProps}
+															>
+																<GripVertical />
+															</ActionIcon>
+														)}
+													</div>
+												)}
+											</Draggable>
+										))}
+										{provided.placeholder}
+									</div>
+								)}
+							</Droppable>
+						</DragDropContext>
 					</div>
 					<Divider orientation="horizontal" />
 					<div className="flex gap-x-2 items-end mt-4">

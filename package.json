@@ -8,7 +8,12 @@
 		"type": "git",
 		"url": "https://github.com/mooxl/maize"
 	},
-	"keywords": ["react", "tanstack", "convex", "web-app"],
+	"keywords": [
+		"react",
+		"tanstack",
+		"convex",
+		"web-app"
+	],
 	"author": "Your Name",
 	"license": "MIT",
 	"bugs": {
@@ -25,6 +30,7 @@
 	"dependencies": {
 		"@auth0/auth0-react": "^2.3.0",
 		"@convex-dev/react-query": "^0.0.0-alpha.8",
+		"@hello-pangea/dnd": "^18.0.1",
 		"@mantine/core": "^8.0.2",
 		"@mantine/hooks": "^8.0.2",
 		"@mantine/notifications": "^8.0.2",
