@@ -267,7 +267,18 @@ const Page = () => {
 							🧊
 						</ActionIcon>
 						{standup.icebreaker && (
-							<Alert variant="light" color="blue" classNames={{ root: 'p-3!' }}>
+							<Alert
+								variant="light"
+								color="blue"
+								classNames={{ root: 'p-3!' }}
+								withCloseButton
+								onClose={() => {
+									setIcebreaker({
+										standupId: standup._id as Id<'standup'>,
+										icebreaker: '',
+									});
+								}}
+							>
 								{standup.icebreaker}
 							</Alert>
 						)}
