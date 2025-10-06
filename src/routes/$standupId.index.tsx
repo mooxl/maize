@@ -24,7 +24,7 @@ import {
 	Paper,
 } from '@mantine/core';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import {
 	ArrowLeft,
 	ArrowRight,
@@ -37,6 +37,7 @@ import {
 	Users,
 } from 'lucide-react';
 import { useMemo } from 'react';
+import { z } from 'zod';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 
@@ -46,6 +47,9 @@ const standupQuery = (id: string) =>
 	});
 
 export const Route = createFileRoute('/$standupId/')({
+	validateSearch: z.object({
+		userId: z.string().optional(),
+	}),
 	loader: async ({ context: { queryClient }, params: { standupId } }) => {
 		const standup = await queryClient.ensureQueryData(standupQuery(standupId));
 		return { standup };
@@ -56,7 +60,7 @@ export const Route = createFileRoute('/$standupId/')({
 const Page = () => {
 	const { standupId } = Route.useParams();
 	const loaderData = Route.useLoaderData();
-
+	const { userId } = Route.useSearch();
 	const { data: standup } = useSuspenseQuery({
 		...standupQuery(standupId),
 		initialData: loaderData.standup,
@@ -121,35 +125,51 @@ const Page = () => {
 		return <div>Standup not found</div>;
 	}
 
-	const { currentUser, currentUpdate, currentIndex, nextUser, previousUser } =
-		useMemo(() => {
-			const currentUser = standup.users.find(
-				(user) => user._id === standup.currentUser,
-			);
-			const currentIndex = standup.users.findIndex(
-				(user) => user._id === standup.currentUser,
-			);
-			const currentUpdate = standup.updates.find(
-				(update) => update.userId === standup.currentUser,
-			);
-			const previousUser =
-				standup.users[
-					standup.users.findIndex((user) => user._id === standup.currentUser) -
-						1
-				];
-			const nextUser =
-				standup.users[
-					standup.users.findIndex((user) => user._id === standup.currentUser) +
-						1
-				];
-			return {
-				currentUser,
-				currentUpdate,
-				currentIndex,
-				nextUser,
-				previousUser,
-			};
-		}, [standup.users, standup.currentUser, standup.updates]);
+	const {
+		currentUser,
+		currentUpdate,
+		currentIndex,
+		nextUser,
+		previousUser,
+		viewingUser,
+		viewingUpdate,
+	} = useMemo(() => {
+		const currentUser = standup.users.find(
+			(user) => user._id === standup.currentUser,
+		);
+		const currentIndex = standup.users.findIndex(
+			(user) => user._id === standup.currentUser,
+		);
+		const currentUpdate = standup.updates.find(
+			(update) => update.userId === standup.currentUser,
+		);
+		const previousUser =
+			standup.users[
+				standup.users.findIndex((user) => user._id === standup.currentUser) - 1
+			];
+		const nextUser =
+			standup.users[
+				standup.users.findIndex((user) => user._id === standup.currentUser) + 1
+			];
+
+		// Get the user and update being viewed (from search params)
+		const viewingUser = userId
+			? standup.users.find((user) => user._id === userId)
+			: currentUser;
+		const viewingUpdate = userId
+			? standup.updates.find((update) => update.userId === userId)
+			: currentUpdate;
+
+		return {
+			currentUser,
+			currentUpdate,
+			currentIndex,
+			nextUser,
+			previousUser,
+			viewingUser,
+			viewingUpdate,
+		};
+	}, [standup.users, standup.currentUser, standup.updates, userId]);
 	const handleDragEnd = (result: DropResult) => {
 		const to = result.destination?.index;
 		if (to === undefined || !standup._id) return;
@@ -198,46 +218,67 @@ const Page = () => {
 												draggableId={user._id}
 												index={index}
 											>
-												{(provided: DraggableProvided) => (
-													<div
-														className="flex items-center justify-between w-full pb-4"
-														ref={provided.innerRef}
-														{...provided.draggableProps}
-													>
-														<div className="flex gap-x-2">
-															{index < currentIndex ? (
-																<div className="rounded-full size-11 bg-blue-200 text-blue-400 flex items-center justify-center">
-																	<Check />
-																</div>
-															) : (
-																<img
-																	className={`rounded-full size-11 overflow-hidden border-3 ${currentIndex === index ? 'border-blue-400' : 'border-gray-200'}`}
-																	src={user.picture}
-																	alt="profile"
-																/>
-															)}
+												{(provided: DraggableProvided) => {
+													const userElement = (
+														<div
+															className={`flex items-center justify-between w-full py-2 rounded-md mb-2 ${standup.startedAt !== 0 ? 'hover:bg-blue-100 transition-colors cursor-pointer' : ''}`}
+															ref={provided.innerRef}
+															{...provided.draggableProps}
+														>
+															<div className="flex gap-x-2">
+																{index < currentIndex ? (
+																	<div className="rounded-full size-11 bg-blue-200 text-blue-400 flex items-center justify-center">
+																		<Check />
+																	</div>
+																) : (
+																	<img
+																		className={`rounded-full size-11 overflow-hidden border-3 ${currentIndex === index ? 'border-blue-400' : 'border-gray-200'}`}
+																		src={user.picture}
+																		alt="profile"
+																	/>
+																)}
 
-															<div className="flex flex-col">
-																<p className="font-medium">{user.name}</p>
-																<Status
-																	standupId={standup._id}
-																	user={user}
-																	updates={standup.updates}
-																	currentUpdate={currentUpdate}
-																	currentUser={standup.currentUser}
-																/>
+																<div className="flex flex-col">
+																	<p className="font-medium">{user.name}</p>
+																	<Status
+																		standupId={standup._id}
+																		user={user}
+																		updates={standup.updates}
+																		currentUpdate={currentUpdate}
+																		currentUser={standup.currentUser}
+																	/>
+																</div>
 															</div>
+															{standup.startedAt === 0 && (
+																<ActionIcon
+																	variant="subtle"
+																	{...provided.dragHandleProps}
+																>
+																	<GripVertical />
+																</ActionIcon>
+															)}
 														</div>
-														{standup.startedAt === 0 && (
-															<ActionIcon
-																variant="subtle"
-																{...provided.dragHandleProps}
-															>
-																<GripVertical />
-															</ActionIcon>
-														)}
-													</div>
-												)}
+													);
+
+													return standup.startedAt !== 0 ? (
+														<Link
+															to="/$standupId"
+															params={{
+																standupId: standup._id as Id<'standup'>,
+															}}
+															search={{
+																userId:
+																	currentUser?._id === user._id
+																		? undefined
+																		: user._id,
+															}}
+														>
+															{userElement}
+														</Link>
+													) : (
+														userElement
+													);
+												}}
 											</Draggable>
 										))}
 										{provided.placeholder}
@@ -314,27 +355,46 @@ const Page = () => {
 						);
 					}
 					if (standup.finishedAt === 0) {
+						const isViewingCurrent = !userId || userId === currentUser?._id;
 						return (
 							<div className="flex flex-col p-4">
 								<div className="flex justify-between items-center mb-4">
 									<div className="flex items-center gap-x-2">
-										<Avatar src={currentUser?.picture} size="lg" />
+										<Avatar src={viewingUser?.picture} size="lg" />
 										<div>
 											<p className="text-lg font-semibold">
-												{currentUser?.name}
+												{viewingUser?.name}
 											</p>
-											<Timer
-												size="md"
-												classNames={{
-													root: 'bg-blue-100!',
-													label: 'text-blue-500/80 flex items-center gap-x-2!',
-												}}
-												startedAt={currentUpdate?.startedAt ?? 0}
-											/>
+											{isViewingCurrent && (
+												<Timer
+													size="md"
+													classNames={{
+														root: 'bg-blue-100!',
+														label:
+															'text-blue-500/80 flex items-center gap-x-2!',
+													}}
+													startedAt={viewingUpdate?.startedAt ?? 0}
+												/>
+											)}
 										</div>
 									</div>
 									<div className="flex gap-x-2">
-										{previousUser && (
+										{!isViewingCurrent && (
+											<Link
+												to="/$standupId"
+												params={{ standupId: standup._id as Id<'standup'> }}
+												search={{ userId: undefined }}
+											>
+												<Button
+													variant="light"
+													size="sm"
+													classNames={{ label: 'flex items-center gap-x-2!' }}
+												>
+													<ArrowLeft size={16} /> Back to {currentUser?.name}
+												</Button>
+											</Link>
+										)}
+										{isViewingCurrent && previousUser && (
 											<Button
 												variant="light"
 												size="sm"
@@ -350,53 +410,55 @@ const Page = () => {
 												<ArrowLeft size={16} /> Previous
 											</Button>
 										)}
-										{nextUser ? (
-											isUserReady(standup.updates, nextUser._id) ? (
+										{isViewingCurrent &&
+											(nextUser ? (
+												isUserReady(standup.updates, nextUser._id) ? (
+													<Button
+														variant="light"
+														size="sm"
+														classNames={{ label: 'flex items-center gap-x-2!' }}
+														onClick={() =>
+															next({
+																standupId: standup._id as Id<'standup'>,
+																currentUser: currentUser?._id as Id<'user'>,
+																nextUser: nextUser?._id as Id<'user'>,
+															})
+														}
+													>
+														<ArrowRight size={16} /> Next
+													</Button>
+												) : (
+													<Button
+														variant="outline"
+														size="sm"
+														classNames={{ label: 'flex items-center gap-x-1!' }}
+														onClick={() =>
+															skip({
+																standupId: standup._id as Id<'standup'>,
+																currentUser: currentUser?._id as Id<'user'>,
+																userToSkip: nextUser?._id as Id<'user'>,
+															})
+														}
+													>
+														<ArrowRightFromLine size={16} /> Skip
+													</Button>
+												)
+											) : (
 												<Button
 													variant="light"
 													size="sm"
-													classNames={{ label: 'flex items-center gap-x-2!' }}
+													color="red"
 													onClick={() =>
-														next({
-															standupId: standup._id as Id<'standup'>,
-															currentUser: currentUser?._id as Id<'user'>,
-															nextUser: nextUser?._id as Id<'user'>,
+														finish({
+															id: standup._id as Id<'standup'>,
+															currentUpdateId:
+																currentUpdate?._id as Id<'update'>,
 														})
 													}
 												>
-													<ArrowRight size={16} /> Next
+													Finish
 												</Button>
-											) : (
-												<Button
-													variant="outline"
-													size="sm"
-													classNames={{ label: 'flex items-center gap-x-1!' }}
-													onClick={() =>
-														skip({
-															standupId: standup._id as Id<'standup'>,
-															currentUser: currentUser?._id as Id<'user'>,
-															userToSkip: nextUser?._id as Id<'user'>,
-														})
-													}
-												>
-													<ArrowRightFromLine size={16} /> Skip
-												</Button>
-											)
-										) : (
-											<Button
-												variant="light"
-												size="sm"
-												color="red"
-												onClick={() =>
-													finish({
-														id: standup._id as Id<'standup'>,
-														currentUpdateId: currentUpdate?._id as Id<'update'>,
-													})
-												}
-											>
-												Finish
-											</Button>
-										)}
+											))}
 									</div>
 								</div>
 								<Divider orientation="horizontal" />
@@ -404,16 +466,16 @@ const Page = () => {
 									<div className="flex flex-col gap-y-1 pt-4">
 										<h3 className="text-lg font-semibold">Yesterday</h3>
 										<Editor
-											key={currentUpdate?.content.yesterday}
-											content={currentUpdate?.content.yesterday ?? ''}
+											key={viewingUpdate?.content.yesterday}
+											content={viewingUpdate?.content.yesterday ?? ''}
 											editable={false}
 										/>
 									</div>
 									<div className="flex flex-col gap-y-1">
 										<h3 className="text-lg font-semibold">Today</h3>
 										<Editor
-											key={currentUpdate?.content.today}
-											content={currentUpdate?.content.today ?? ''}
+											key={viewingUpdate?.content.today}
+											content={viewingUpdate?.content.today ?? ''}
 											editable={false}
 										/>
 									</div>
